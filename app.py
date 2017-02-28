@@ -14,6 +14,7 @@ import urllib
 from flask import (Flask, flash, Markup, redirect, render_template, request,
                    Response, session, url_for)
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 from markdown import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -68,6 +69,34 @@ oembed_providers = bootstrap_basic(OEmbedCache())
 # Flask-Bcrypt is a Flask extension that provides bcrypt hashing utilities for your application.
 # https://flask-bcrypt.readthedocs.io/en/latest/
 bcrypt = Bcrypt(app)
+
+# Flask-Login provides user session management for Flask. It handles the common tasks of logging in, logging out, 
+# and remembering your users’ sessions over extended periods of time.
+# https://flask-login.readthedocs.io/en/latest/
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class User(flask_db.Model):
+    username = CharField(unique=True)
+    email = CharField(unique=True, index=True)
+    password = CharField()
+    authenticated = BooleanField(index=True)
+
+    def is_active(self):
+        """ True, as all users are active """
+        return True
+
+    def get_id(self):
+        """ Return the email address to satisfy Flask-Login's requirements  """
+        return self.email
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
 
 class Entry(flask_db.Model):
     title = CharField()
