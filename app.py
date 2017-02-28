@@ -221,6 +221,7 @@ def register():
                 with database.atomic():
                     user.create(
                         username = request.form.get('username'),
+                        name = request.form.get('name'),
                         email = request.form.get('email'),
                         password = bcrypt.generate_password_hash(request.form.get('password')),
                         authenticated = True)
