@@ -11,11 +11,9 @@ import os
 import re
 import urllib
 
-from flask import (Flask, flash, Markup, redirect, render_template, request,
-                   Response, session, url_for)
+from flask import (Flask, flash, Markup, redirect, render_template, request, Response, session, url_for)
 from flask_bcrypt import Bcrypt
-from flask.ext.login import LoginManager, UserMixin, \
-                                login_required, login_user, logout_user 
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
 from markdown import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -78,11 +76,20 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-class User(flask_db.Model):
+# Pluralize
+@app.template_filter('pluralize')
+def pluralize(number, singular = '', plural = 's'):
+    if number == 1:
+        return singular
+    else:
+        return plural
+
+class User(flask_db.Model, UserMixin):
     username = CharField(unique=True)
     email = CharField(unique=True, index=True)
-    password = CharField()
+    password = CharField(max_length=255)
     authenticated = BooleanField(index=True)
+    timestamp = DateTimeField(default=datetime.datetime.now, index=True)
 
     def is_active(self):
         """ True, as all users are active """
@@ -189,52 +196,61 @@ class FTSEntry(FTSModel):
     class Meta:
         database = database
 
-# def login_required(fn):
-#     @functools.wraps(fn)
-#     def inner(*args, **kwargs):
-#         if session.get('logged_in'):
-#             return fn(*args, **kwargs)
-#         return redirect(url_for('login', next=request.path))
-#     return inner
+def anonymous_required(fn):
+    @functools.wraps(fn)
+    def inner(*args, **kwargs):
+        if not session.get('logged_in'):
+            return fn(*args, **kwargs)
+        return redirect(url_for('account'))
+    return inner
 
 @app.route('/register/', methods=['GET', 'POST'])
+@anonymous_required
 def register():
     if request.method == 'POST' and request.form.get('username') and request.form.get('email') and request.form.get('password'):
         if request.form.get('password') == request.form.get('confirm-password'):
             user = User
-            user.username = request.form.get('username')
-            user.email = request.form.get('email')
-            user.password = bcrypt.generate_password_hash(request.form.get('password'))
-            user.authenticated = True
             try:
                 with database.atomic():
-                    user.save()
+                    user.create(
+                        username = request.form.get('username'),
+                        email = request.form.get('email'),
+                        password = bcrypt.generate_password_hash(request.form.get('password')),
+                        authenticated = True)
             except IntegrityError:
-                flash('Error: this user is already exist.', 'danger')
+                flash('Error: This user is already exist.', 'danger')
             else:
                 flash('Account saved successfully.', 'success')
+                login_user(user)
+                session['logged_in'] = True
+                session.permanent = True
                 return redirect(url_for('index'))
         else:
             flash('Your password don\'t match the confirm password.', 'danger')
-    else:
-        flash('Please fill all the fields.', 'danger')
+
+    return render_template('register.html')
 
 
 @app.route('/login/', methods=['GET', 'POST'])
+@anonymous_required
 def login():
     next_url = request.args.get('next') or request.form.get('next')
     if request.method == 'POST' and request.form.get('password') and request.form.get('username'):
-        password = bcrypt.generate_password_hash(request.form.get('password'))
+        password = request.form.get('password')
         username = request.form.get('username')
-        user = User.get_object_or_404(User.select(), User.username == username)
-        if bcrypt.check_password_hash(password, user.password):
-            login_user(user.id)
-            # session['logged_in'] = True
-            # session.permanent = True  # Use cookie to store session.
-            flash('You are now logged in.', 'success')
-            return redirect(next_url or url_for('index'))
+        try:
+            registered_user = User.select().where(User.username == username).get()
+        except:
+            flash('User don\' exist.', 'danger')
         else:
-            flash('Incorrect username/password.', 'danger')
+            if bcrypt.check_password_hash(registered_user.password, password):
+                login_user(registered_user, remember=True)
+                session['logged_in'] = True
+                session.permanent = True  # Use cookie to store session.
+                flash('You are now logged in.', 'success')
+                return redirect(next_url or url_for('index'))
+            else:
+                flash('Incorrect password.', 'danger')
     return render_template('login.html', next_url=next_url)
 
 @app.route('/logout/', methods=['GET', 'POST'])
@@ -246,6 +262,36 @@ def logout():
         logout_user()
         return redirect(url_for('login'))
     return render_template('logout.html')
+
+@app.route('/account/', methods=['GET', 'POST'])
+@login_required
+def account():
+    user = current_user
+    if request.method == 'POST':
+        if request.form.get('actual-password'):
+            if request.form.get('new-password') and request.form.get('new-password') == request.form.get('confirm-new-password'):
+                user.password = bcrypt.generate_password_hash(request.form.get('new-password'))
+                try:
+                    with database.atomic():
+                        user.save()
+                except IntegrityError:
+                    flash('Error: couldn\'t save your new password.', 'danger')
+                else:
+                    pass
+            else:
+                flash('Your new password doesn\'t match confirm new password', 'danger')
+
+            user.email = request.form.get('email')
+            try:
+                with database.atomic():
+                    user.save()
+            except IntegrityError:
+                flash('Error: couldn\'t save your email.', 'danger')
+            else:
+                flash('Account profile saved successfuly.', 'success')
+                return redirect(url_for('account'))
+
+    return render_template('account.html', user=user)
 
 @app.route('/')
 def index():
@@ -340,8 +386,10 @@ def user_loader(user_id):
 
     :param unicode user_id: user_id (email) user to retrieve
     """
-    return User.query.get(user_id)
-
+    try:
+        return User.select().where(id==user_id)
+    except:
+        return None
 
 @app.template_filter('clean_querystring')
 def clean_querystring(request_args, *keys_to_remove, **new_values):
@@ -361,7 +409,7 @@ def not_found(exc):
     return render_template('404.html')
 
 def main():
-    database.create_tables([Entry, FTSEntry], safe=True)
+    database.create_tables([Entry, FTSEntry, User], safe=True)
     app.run(host='0.0.0.0', debug=True, port=app.config['PORT'])
 
 if __name__ == '__main__':
