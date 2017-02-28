@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 #################################################################################
-#       Aplication created while learning Flask using their blog tutorial       #
+#      Application created while learning Flask using their blog tutorial       #
 #                                                                               #
 #                               bx0 ( Lucas Nunes )                             #
 #################################################################################
