@@ -14,7 +14,8 @@ import urllib
 from flask import (Flask, flash, Markup, redirect, render_template, request,
                    Response, session, url_for)
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask.ext.login import LoginManager, UserMixin, \
+                                login_required, login_user, logout_user 
 
 from markdown import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -75,6 +76,7 @@ bcrypt = Bcrypt(app)
 # https://flask-login.readthedocs.io/en/latest/
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = "login"
 
 class User(flask_db.Model):
     username = CharField(unique=True)
@@ -187,32 +189,61 @@ class FTSEntry(FTSModel):
     class Meta:
         database = database
 
-def login_required(fn):
-    @functools.wraps(fn)
-    def inner(*args, **kwargs):
-        if session.get('logged_in'):
-            return fn(*args, **kwargs)
-        return redirect(url_for('login', next=request.path))
-    return inner
+# def login_required(fn):
+#     @functools.wraps(fn)
+#     def inner(*args, **kwargs):
+#         if session.get('logged_in'):
+#             return fn(*args, **kwargs)
+#         return redirect(url_for('login', next=request.path))
+#     return inner
+
+@app.route('/register/', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST' and request.form.get('username') and request.form.get('email') and request.form.get('password'):
+        if request.form.get('password') == request.form.get('confirm-password'):
+            user = User
+            user.username = request.form.get('username')
+            user.email = request.form.get('email')
+            user.password = bcrypt.generate_password_hash(request.form.get('password'))
+            user.authenticated = True
+            try:
+                with database.atomic():
+                    user.save()
+            except IntegrityError:
+                flash('Error: this user is already exist.', 'danger')
+            else:
+                flash('Account saved successfully.', 'success')
+                return redirect(url_for('index'))
+        else:
+            flash('Your password don\'t match the confirm password.', 'danger')
+    else:
+        flash('Please fill all the fields.', 'danger')
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     next_url = request.args.get('next') or request.form.get('next')
-    if request.method == 'POST' and request.form.get('password'):
+    if request.method == 'POST' and request.form.get('password') and request.form.get('username'):
         password = bcrypt.generate_password_hash(request.form.get('password'))
-        if bcrypt.check_password_hash(password, app.config['ADMIN_PASSWORD']):
-            session['logged_in'] = True
-            session.permanent = True  # Use cookie to store session.
+        username = request.form.get('username')
+        user = User.get_object_or_404(User.select(), User.username == username)
+        if bcrypt.check_password_hash(password, user.password):
+            login_user(user.id)
+            # session['logged_in'] = True
+            # session.permanent = True  # Use cookie to store session.
             flash('You are now logged in.', 'success')
             return redirect(next_url or url_for('index'))
         else:
-            flash('Incorrect password.', 'danger')
+            flash('Incorrect username/password.', 'danger')
     return render_template('login.html', next_url=next_url)
 
 @app.route('/logout/', methods=['GET', 'POST'])
 def logout():
     if request.method == 'POST':
+        user = current_user
+        user.authenticated = False
         session.clear()
+        logout_user()
         return redirect(url_for('login'))
     return render_template('logout.html')
 
