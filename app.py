@@ -48,6 +48,11 @@ SECRET_KEY = 'shhh, secret!'
 # embedded objects with maxwidth=800.
 SITE_WIDTH = 800
 
+# Website information
+LOGO_TEXT = ''
+LOGO_IMG = 'images/logo.png'
+FOOTER_TEXT = '2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a>'
+
 # Create a Flask WSGI app and configure it using values from the module.
 app = Flask(__name__)
 app.config.from_object(__name__)
