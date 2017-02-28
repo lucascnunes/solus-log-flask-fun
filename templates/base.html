@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Solus</title>
+    <title>{% if config['WEBSITE_TITLE'] %} {{ config['WEBSITE_TITLE'] }} {% else %} Solus logs {% endif %}</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,11 +21,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/logo.png') }}" class="img-responsive" style="width: 50%;"></a>
+          <a class="navbar-brand" href="{{ url_for('index') }}">{% if config['LOGO_IMG'] %}<img src="{% if config['LOGO_IMG'] %} {{ url_for('static', filename='images/' + config['LOGO_IMG']) }}"  class="img-responsive" style="width: 50%;"> {% else %} {{ url_for('static', filename='images/logo.png') }}" class="img-responsive" style="width: 50%;">{% endif %} {% else %} {% if config['LOGO_TEXT'] %} {{ config['LOGO_TEXT'] }} {% else %} Solus logs {% endif %} {% endif %}</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-left">
-            <li><a href="{{ url_for('index') }}">Logs</a></li>
+            <li><a href="{{ url_for('index') }}">{% if config['INDEX_PAGE_NAME'] %}{{ config['INDEX_PAGE_NAME'] }}{% else %}Logs{% endif %}</a></li>
             {% if session.logged_in %}
               <li><a href="{{ url_for('drafts') }}">Drafts</a></li>
               <li><a href="{{ url_for('create') }}">Create Entry</a></li>
@@ -66,11 +66,24 @@
 
       <footer>
         <hr />
-        <h6>2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a></h6>
+        <h6>{% if config['FOOTER_TEXT'] %} {{ config['FOOTER_TEXT']|safe }} {% else %}2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a>{% endif %}</h6>
       </footer>
     </div>
     <script src="{{ url_for('static', filename='js/jquery-1.11.0.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/showdown.min.js') }}"></script>
+    <script>
+    $('#content').bind('input propertychange', function() {
+      run();
+    });
+    function run() {
+      var converter = new showdown.Converter(),
+        text      = document.getElementById('content').value,
+        target    = document.getElementById('preview'),
+        html      = converter.makeHtml(text);
+        target.innerHTML = html;
+    }
+    </script>
     {% block extra_scripts %}{% endblock %}
   </body>
 </html>

@@ -33,7 +33,17 @@ from playhouse.sqlite_ext import *
 # You may consider using a one-way hash to generate the password, and then
 # use the hash again in the login view to perform the comparison. This is just
 # for simplicity.
-ADMIN_PASSWORD = 'secret'
+ADMIN_PASSWORD = 'secret' # change the password
+
+# Website information
+WEBSITE_TITLE = 'Blog page' # website page title
+LOGO_TEXT = 'Blog name' # if LOGO_IMG empty LOGO_TEXT will be show
+LOGO_IMG = 'logo.png' # put the image on 'static/images/' folder and change the value of this variable to your image file.extension
+INDEX_PAGE_NAME = 'Index' # name of the index page link
+FOOTER_TEXT = '2017 &copy; All rights reserved.' # website page footer
+
+#############################################################################
+
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # The playhouse.flask_utils.FlaskDB object accepts database URL configuration.
@@ -47,11 +57,6 @@ SECRET_KEY = 'shhh, secret!'
 # This is used by micawber, which will attempt to generate rich media
 # embedded objects with maxwidth=800.
 SITE_WIDTH = 800
-
-# Website information
-LOGO_TEXT = ''
-LOGO_IMG = 'images/logo.png'
-FOOTER_TEXT = '2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a>'
 
 # Create a Flask WSGI app and configure it using values from the module.
 app = Flask(__name__)

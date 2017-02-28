@@ -5,41 +5,49 @@
 {% block content_title %} <div class="container">Create entry</div> {% endblock %}
 
 {% block content %}
-<div class="container">
-  <form action="{% block form_action %}{{ url_for('create') }}{% endblock %}" class="form-horizontal" method="post">
-    <div class="form-group">
-      <label for="title" class="col-sm-2 control-label">Title</label>
-      <div class="col-sm-10">
-        <input class="form-control" id="title" name="title" type="text" value="{{ entry.title }}">
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="Content" class="col-sm-2 control-label">Content</label>
-      <div class="col-sm-10">
-        <textarea class="form-control" id="content" name="content" style="height: 300px;">{{ entry.content }}</textarea>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-10">
-        <div class="checkbox">
-          <label>
-            <input name="published" type="checkbox" value="y"{% if entry.published %} checked="checked"{% endif %}> Published?
-          </label>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-6">
+      <form action="{% block form_action %}{{ url_for('create') }}{% endblock %}" class="form-horizontal" method="post">
+        <div class="form-group">
+          <label for="title" class="col-sm-2 control-label">Title</label>
+          <div class="col-sm-10">
+            <input class="form-control" id="title" name="title" type="text" value="{{ entry.title }}">
+          </div>
         </div>
-      </div>
+        <div class="form-group">
+          <label for="Content" class="col-sm-2 control-label">Content</label>
+          <div class="col-sm-10">
+            <textarea class="form-control" id="content" onchange="run()" name="content" style="height: 300px;">{{ entry.content }}</textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <div class="checkbox">
+              <label>
+                <input name="published" type="checkbox" value="y"{% if entry.published %} checked="checked"{% endif %}> Published?
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-lg-8">
+            <p><a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown cheatsheet</a></p>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-success btn-sm" type="submit">{% block save_button %}Create{% endblock %}</button>
+            {% block delete_button %}{% endblock %}
+            <a class="btn btn-primary btn-sm markdown-preview" onClick="run()">Preview</a>
+            <a class="btn btn-default btn-sm" href="{{ url_for('index') }}">Cancel</a>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-lg-8">
-        <p><a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown cheatsheet</a></p>
-      </div>
+    <div class="col-lg-6">
+      <div id="preview"> </div>
     </div>
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-10">
-        <button class="btn btn-success btn-sm" type="submit">{% block save_button %}Create{% endblock %}</button>
-        {% block delete_button %}{% endblock %}
-        <a class="btn btn-default btn-sm" href="{{ url_for('index') }}">Cancel</a>
-      </div>
-    </div>
-  </form>
+  </div>
 </div>
 {% endblock %}
