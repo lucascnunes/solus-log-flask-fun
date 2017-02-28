@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Logs{% endblock %}
+{% block title %}{% if config['INDEX_PAGE_NAME'] %}{{ config['INDEX_PAGE_NAME'] }}{% else %}Logs{% endif %}{% endblock %}
 
 {% block content_title %}{% if search %}Searching for "{{ search }}"{% elif drafts %}Drafts{% endif %}{% endblock %}
 
 {% block content %}
+    {% if search %}
+      <h6>Showing {{ object_list|length }} entr{{ object_list|length|pluralize('y','ies') }}</h6>
+    {% endif %}
+
   {% for entry in object_list %}
     {% if search %}
       {% set entry = entry.entry %}
