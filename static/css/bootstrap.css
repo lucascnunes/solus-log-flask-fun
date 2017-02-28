@@ -3921,6 +3921,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   width: 22px;
   height: 2px;
   border-radius: 1px;
+  background-color: #756f6f;
+  margin: 10px 0px 0px;
 }
 .navbar-toggle .icon-bar + .icon-bar {
   margin-top: 4px;
@@ -3972,6 +3974,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   .navbar-nav > li > a {
     padding-top: 15px;
     padding-bottom: 15px;
+    margin-top:10px;
   }
   .navbar-nav.navbar-right:last-child {
     margin-right: 20px;
@@ -4006,6 +4009,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
     display: inline-block;
     width: auto;
     vertical-align: middle;
+    margin-top:12px;
   }
   .navbar-form .input-group {
     display: inline-table;

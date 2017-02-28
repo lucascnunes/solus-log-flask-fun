@@ -11,7 +11,7 @@ import os
 import re
 import urllib
 
-from flask import (Flask, flash, Markup, redirect, render_template, request, Response, session, url_for)
+from flask import (Flask, flash, Markup, redirect, render_template, request, Response, session, url_for, g)
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
@@ -86,26 +86,33 @@ def pluralize(number, singular = '', plural = 's'):
 
 class User(flask_db.Model, UserMixin):
     username = CharField(unique=True)
+    name = CharField()
     email = CharField(unique=True, index=True)
     password = CharField(max_length=255)
     authenticated = BooleanField(index=True)
     timestamp = DateTimeField(default=datetime.datetime.now, index=True)
+    
+    # @property
+    # def is_active(self):
+    #     """ True, as all users are active """
+    #     return True
 
-    def is_active(self):
-        """ True, as all users are active """
-        return True
+    # @property
+    # def is_authenticated(self):
+    #     """Return True if the user is authenticated."""
+    #     return self.authenticated
+
+    # @property
+    # def is_anonymous(self):
+    #     """False, as anonymous users aren't supported."""
+    #     return False
+
+    def avatar(self, size):
+        return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(self.email.encode('utf-8')).hexdigest(), size)
 
     def get_id(self):
         """ Return the email address to satisfy Flask-Login's requirements  """
         return self.email
-
-    def is_authenticated(self):
-        """Return True if the user is authenticated."""
-        return self.authenticated
-
-    def is_anonymous(self):
-        """False, as anonymous users aren't supported."""
-        return False
 
 class Entry(flask_db.Model):
     title = CharField()
@@ -282,11 +289,12 @@ def account():
                 flash('Your new password doesn\'t match confirm new password', 'danger')
 
             user.email = request.form.get('email')
+            user.name = request.form.get('name')
             try:
                 with database.atomic():
                     user.save()
             except IntegrityError:
-                flash('Error: couldn\'t save your email.', 'danger')
+                flash('Error: couldn\'t save your profile.', 'danger')
             else:
                 flash('Account profile saved successfuly.', 'success')
                 return redirect(url_for('account'))
@@ -380,6 +388,10 @@ def delete(slug):
 
     return render_template('delete.html', entry=entry)
 
+@app.before_request
+def before_request():
+    g.user = current_user
+
 @login_manager.user_loader
 def user_loader(user_id):
     """Given *user_id*, return the associated User object.
@@ -387,7 +399,7 @@ def user_loader(user_id):
     :param unicode user_id: user_id (email) user to retrieve
     """
     try:
-        return User.select().where(id==user_id)
+        return User.get(email==user_id)
     except:
         return None
 

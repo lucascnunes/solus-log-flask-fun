@@ -29,14 +29,15 @@
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-left">
             <li><a href="{{ url_for('index') }}">{% if config['INDEX_PAGE_NAME'] %}{{ config['INDEX_PAGE_NAME'] }}{% else %}Logs{% endif %}</a></li>
-            {% if session.logged_in %}
+            {% if session.get('logged_in') %}
               <li><a href="{{ url_for('drafts') }}">Drafts</a></li>
               <li><a href="{{ url_for('create') }}">Create Entry</a></li>
             {% endif %}
             {% block extra_header %}{% endblock %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            {% if session.logged_in %}
+            {% if session.get('logged_in') %}
+              <li class="navbar-brand" style="font-size:13px;">Hi {{ g.user.name }}!</li>
               <li><a href="{{ url_for('logout') }}">Sign out</a></li>
             {% else %}
               <li><a href="{{ url_for('register') }}">Sign up</a></li>
