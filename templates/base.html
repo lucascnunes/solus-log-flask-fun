@@ -73,9 +73,13 @@
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/showdown.min.js') }}"></script>
     <script>
-    $('#content').bind('input propertychange', function() {
+    $( document ).ready(function() {
       run();
+      $('#content').bind('input propertychange', function() {
+        run();
+      });
     });
+
     function run() {
       var converter = new showdown.Converter(),
         text      = document.getElementById('content').value,
