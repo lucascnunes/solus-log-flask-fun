@@ -2,15 +2,28 @@
 
 Application created while learning Flask using their blog tutorial
 
+
+### Instalation
 For the application to work properly run this command to install the packages
 
-```pip install flask peewee pygments markdown micawber BeautifulSoup flask-bcrypt flask-login```
+```bash
+pip install flask peewee pygments markdown micawber BeautifulSoup flask-bcrypt flask-login
+```
 
 or
 
-```pip install -r requirements.txt```
+```bash
+pip install -r requirements.txt
+```
 
-Since Justin` asked for options to make the "blog like thingy" personal now you can edit
+### Executing application
+
+At the main folder run
+
+``` python app.py ```
+
+### Page costumization
+Since *Justin`* asked for options to make the "blog like thingy" personal now you can edit
 the config.cfg and change options like
 
 	* WEBSITE_TITLE
@@ -20,9 +33,11 @@ the config.cfg and change options like
 	* FOOTER_TEXT
 	* PORT
 
-*@todos*
 
-User registration/authentication
+**@todos**
+~~Customize page~~
+~~User registration/authentication~~
 
-Preview:
-![alt tag](screenshot.png)
+
+**Preview:**
+![preview](screenshot.png)
