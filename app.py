@@ -29,22 +29,7 @@ from playhouse.sqlite_ext import *
 
 
 # Blog configuration values.
-
-# You may consider using a one-way hash to generate the password, and then
-# use the hash again in the login view to perform the comparison. This is just
-# for simplicity.
-ADMIN_PASSWORD = 'secret' # change the password
-
-# Website information
-WEBSITE_TITLE = '' # website page title
-LOGO_TEXT = '' # if LOGO_IMG empty LOGO_TEXT will be show
-LOGO_IMG = '' # put the image on 'static/images/' folder and change the value of this variable to your image file.extension
-INDEX_PAGE_NAME = '' # name of the index page link
-FOOTER_TEXT = '' # website page footer
-
-# custom port
-# port 80 only works without apache or nginx if they are running you need to stop them before runing the application
-PORT= 8000
+# Edit config.cfg file
 
 #############################################################################
 
@@ -65,6 +50,7 @@ SITE_WIDTH = 800
 # Create a Flask WSGI app and configure it using values from the module.
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config.from_pyfile('config.cfg')
 
 # FlaskDB is a wrapper for a peewee database that sets up pre/post-request
 # hooks for managing database connections.
