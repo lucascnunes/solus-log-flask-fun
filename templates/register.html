@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content_title %} <div class="container">Sign up</div> {% endblock %}
+
+{% block content %}
+<div class="container">
+  <form action="{{ url_for('register', next='/account/') }}" class="form-horizontal" method="post">
+    <div class="form-group">
+      <label for="username" class="col-sm-2 control-label">Username</label>
+      <div class="col-sm-10">
+        <input class="form-control" id="username" name="username" type="text">
+      </div>
+      <label for="email" class="col-sm-2 control-label">Email</label>
+      <div class="col-sm-10">
+        <input class="form-control" id="email" name="email" type="text">
+      </div>
+      <label for="password" class="col-sm-2 control-label">Password</label>
+      <div class="col-sm-10">
+        <input class="form-control" id="password" name="password" type="password">
+      </div>
+      <label for="confirm-password" class="col-sm-2 control-label">Confirm Password</label>
+      <div class="col-sm-10">
+        <input class="form-control" id="confirm-password" name="confirm-password" type="password">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-success btn-block" type="submit">Sign up</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(function() {
+  $('input[type=text]').on('keypress', function(e) {
+      if (e.which == 32)
+          return false;
+  });
+});
+</script>
+{% endblock %}
