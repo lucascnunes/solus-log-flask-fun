@@ -2,7 +2,7 @@
 
 {% block title %}{{ entry.title }}{% endblock %}
 
-{% block content_title %} <div class="container">{{ entry.title }}</div> {% endblock %}
+{% block content_title %} <div class="container">{{ entry.title|upper }}</div> {% endblock %}
 
 {% block extra_header %}
   {% if session.logged_in %}
