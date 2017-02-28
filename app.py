@@ -42,6 +42,10 @@ LOGO_IMG = '' # put the image on 'static/images/' folder and change the value of
 INDEX_PAGE_NAME = '' # name of the index page link
 FOOTER_TEXT = '' # website page footer
 
+# custom port
+# port 80 only works without apache or nginx if they are running you need to stop them before runing the application
+PORT= 8000
+
 #############################################################################
 
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -303,7 +307,7 @@ def not_found(exc):
 
 def main():
     database.create_tables([Entry, FTSEntry], safe=True)
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, port=app.config['PORT'])
 
 if __name__ == '__main__':
     main()

@@ -21,7 +21,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ url_for('index') }}">{% if not config['LOGO_TEXT'] %}<img src="{% if config['LOGO_IMG'] %} {{ url_for('static', filename='images/' + config['LOGO_IMG']) }}"  class="img-responsive" style="width: 50%;"> {% else %} {{ url_for('static', filename='images/logo.png') }}" class="img-responsive" style="width: 50%;">{% endif %} {% else %} {% if config['LOGO_TEXT'] %} {{ config['LOGO_TEXT'] }} {% else %} Solus logs {% endif %} {% endif %}</a>
+          <a class="navbar-brand" href="{{ url_for('index') }}">{% if config['LOGO_IMG'] or not config['LOGO_TEXT'] %}<img src="{% if config['LOGO_IMG'] %} {{ url_for('static', filename='images/' + config['LOGO_IMG']) }}"  class="img-responsive" style="width: 50%;"> {% else %} {{ url_for('static', filename='images/logo.png') }}" class="img-responsive" style="width: 50%;">{% endif %} {% else %} {% if config['LOGO_TEXT'] %} <span style="margin-top: 5px;">{{ config['LOGO_TEXT'] }}</span> {% else %} <span style="margin-top: 5px;">Solus logs</span> {% endif %} {% endif %}</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-left">
