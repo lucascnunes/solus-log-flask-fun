@@ -35,7 +35,9 @@ the config.cfg and change options like
 
 
 **@todos**
+
 ~~Customize page~~
+
 ~~User registration/authentication~~
 
 
