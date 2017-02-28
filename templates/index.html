@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Logs{% endblock %}
+
+{% block content_title %}{% if search %}Searching for "{{ search }}"{% elif drafts %}Drafts{% endif %}{% endblock %}
+
+{% block content %}
+  {% for entry in object_list %}
+    {% if search %}
+      {% set entry = entry.entry %}
+    {% endif %}
+    <h5>
+      {{ entry.timestamp.strftime('%b %d, %Y') }} | 
+      <a href="{% if entry.published %}{{ url_for('detail', slug=entry.slug) }}{% else %}{{ url_for('edit', slug=entry.slug) }}{% endif %}">
+        {{ entry.title }}
+      </a>
+    </h5>
+  {% else %}
+    <h5>No entries have been created yet.</h5>
+  {% endfor %}
+  {% include "includes/pagination.html" %}
+{% endblock %}

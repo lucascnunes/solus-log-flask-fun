@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Logs{% endblock %}
+
+{% block content_title %}{% if search %}Searching for "{{ search }}"{% elif drafts %}Drafts{% endif %}{% endblock %}
+
+{% block content %}
+  <h1>404</h1>
+  <h4>Ops, we didn't found what you were looking for</h4>
+{% endblock %}

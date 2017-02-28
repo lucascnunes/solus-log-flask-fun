@@ -1,0 +1,11 @@
+{% extends "create.html" %}
+
+{% block title %}Edit entry{% endblock %}
+
+{% block content_title %} <div class="container">Edit entry</div>{% endblock %}
+
+{% block form_action %}{{ url_for('edit', slug=entry.slug) }}{% endblock %}
+
+{% block save_button %}Save changes{% endblock %}
+
+{% block delete_button %} <a href="{{ url_for('delete', slug=entry.slug) }}" class="btn btn-danger btn-sm">Delete</a> {% endblock %}

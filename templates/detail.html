@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entry.title }}{% endblock %}
+
+{% block content_title %} <div class="container">{{ entry.title }}</div> {% endblock %}
+
+{% block extra_header %}
+  {% if session.logged_in %}
+    <li><a href="{{ url_for('edit', slug=entry.slug) }}">Edit entry</a></li>
+    <li><a class="text-danger" href="{{ url_for('delete', slug=entry.slug) }}">Delete entry</a></li>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h5 class="text-right">Logged {{ entry.timestamp.strftime('%m/%d/%Y at %I:%M %p') }}</h5>
+	  {{ entry.html_content }}	
+</div>
+  
+{% endblock %}

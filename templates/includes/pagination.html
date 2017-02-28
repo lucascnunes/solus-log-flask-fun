@@ -1,0 +1,10 @@
+{% if pagination.get_page_count() > 1 %}
+<ul class="pager">
+  {% if pagination.get_page() > 1 %}
+    <li class="previous" style="font-size: 13px;"><a href="./?{{ request.args|clean_querystring('page', page=pagination.get_page() - 1) }}">Previous {{ pagination.get_page() - 1 }} / {{ pagination.get_page_count() }}</a></li>
+  {% endif %}
+  {% if pagination.get_page_count() > pagination.get_page() %}
+    <li class="next" style="font-size: 13px;"><a href="./?{{ request.args|clean_querystring('page', page=pagination.get_page() + 1) }}">Next {{ pagination.get_page() + 1 }} / {{ pagination.get_page_count() }}</a></li>
+  {% endif %}
+</ul>
+{% endif %}
