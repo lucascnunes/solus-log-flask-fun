@@ -303,6 +303,15 @@ def delete(slug):
 
     return render_template('delete.html', entry=entry)
 
+@login_manager.user_loader
+def user_loader(user_id):
+    """Given *user_id*, return the associated User object.
+
+    :param unicode user_id: user_id (email) user to retrieve
+    """
+    return User.query.get(user_id)
+
+
 @app.template_filter('clean_querystring')
 def clean_querystring(request_args, *keys_to_remove, **new_values):
     # We'll use this template filter in the pagination include. This filter

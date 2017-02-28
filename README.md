@@ -11,13 +11,14 @@ or
 ```pip install -r requirements.txt```
 
 Since Justin` asked for options to make the "blog like thingy" personal now you can edit
-the app.py and change options like
+the config.cfg and change options like
 
 	* WEBSITE_TITLE
 	* LOGO_TEXT
 	* LOGO_IMG
 	* INDEX_PAGE_NAME
 	* FOOTER_TEXT
+	* PORT
 
 *@todos*
 
