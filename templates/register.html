@@ -41,7 +41,7 @@
 {% block extra_scripts %}
 <script>
 $(function() {
-  $('input[type=text]').on('keypress', function(e) {
+  $('#username, #email, #password, #confirm-password').on('keypress', function(e) {
       if (e.which == 32)
           return false;
   });
