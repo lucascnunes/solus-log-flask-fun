@@ -36,11 +36,11 @@ from playhouse.sqlite_ext import *
 ADMIN_PASSWORD = 'secret' # change the password
 
 # Website information
-WEBSITE_TITLE = 'Blog page' # website page title
-LOGO_TEXT = 'Blog name' # if LOGO_IMG empty LOGO_TEXT will be show
-LOGO_IMG = 'logo.png' # put the image on 'static/images/' folder and change the value of this variable to your image file.extension
-INDEX_PAGE_NAME = 'Index' # name of the index page link
-FOOTER_TEXT = '2017 &copy; All rights reserved.' # website page footer
+WEBSITE_TITLE = '' # website page title
+LOGO_TEXT = '' # if LOGO_IMG empty LOGO_TEXT will be show
+LOGO_IMG = '' # put the image on 'static/images/' folder and change the value of this variable to your image file.extension
+INDEX_PAGE_NAME = '' # name of the index page link
+FOOTER_TEXT = '' # website page footer
 
 #############################################################################
 
