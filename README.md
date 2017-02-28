@@ -4,7 +4,11 @@ Application created while learning Flask using their blog tutorial
 
 For the application to work properly run this command to install the packages
 
-```pip install flask peewee pygments markdown micawber BeautifulSoup flask-bcrypt```
+```pip install flask peewee pygments markdown micawber BeautifulSoup flask-bcrypt flask-login```
+
+or
+
+```pip install -r requirements.txt```
 
 Since Justin` asked for options to make the "blog like thingy" personal now you can edit
 the app.py and change options like
@@ -16,6 +20,7 @@ the app.py and change options like
 	* FOOTER_TEXT
 
 *@todos*
+
 User registration/authentication
 
 Preview:
