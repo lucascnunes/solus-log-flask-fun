@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 #################################################################################
 #       Aplication created while learning Flask using their blog tutorial       #
 #                                                                               #
@@ -46,7 +47,6 @@ SECRET_KEY = 'shhh, secret!'
 # This is used by micawber, which will attempt to generate rich media
 # embedded objects with maxwidth=800.
 SITE_WIDTH = 800
-
 
 # Create a Flask WSGI app and configure it using values from the module.
 app = Flask(__name__)
@@ -293,7 +293,7 @@ def not_found(exc):
 
 def main():
     database.create_tables([Entry, FTSEntry], safe=True)
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
 
 if __name__ == '__main__':
     main()
