@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
   <head>
-    <title>{% if config['WEBSITE_TITLE'] %} {{ config['WEBSITE_TITLE'] }} {% else %} Solus logs {% endif %}</title>
+    <title>{% if config['WEBSITE_TITLE'] %} {{ config['WEBSITE_TITLE'] }} {% else %} Solus logs {% endif %} {% if self.title() %} - {% block title %}{% endblock %}{% endif %}
+</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,6 +39,7 @@
             {% if session.logged_in %}
               <li><a href="{{ url_for('logout') }}">Sign out</a></li>
             {% else %}
+              <li><a href="{{ url_for('register') }}">Sign up</a></li>
               <li><a href="{{ url_for('login') }}">Sign in</a></li>
             {% endif %}
             {% block search_bar %}
@@ -73,28 +75,6 @@
     </div>
     <script src="{{ url_for('static', filename='js/jquery-1.11.0.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/markdown-it.min.js') }}"></script>
-    <script>
-    $( document ).ready(function() {
-      run();
-      $('#content').bind('input propertychange', function() {
-        run();
-      });
-    });
-
-    function run() {
-        var mdText = document.getElementById('content').value;
-
-        var md = window.markdownit({
-            html: true,
-            linkify: true,
-            typographer: true
-        });
-
-        // HOWTO: Render the xmp#markdown content as html
-        document.getElementById('preview').innerHTML = md.render(mdText);
-    }
-    </script>
     {% block extra_scripts %}{% endblock %}
   </body>
 </html>

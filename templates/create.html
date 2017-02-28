@@ -50,3 +50,28 @@
   </div>
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/markdown-it.min.js') }}"></script>
+    <script>
+    $( document ).ready(function() {
+      run();
+      $('#content').bind('input propertychange', function() {
+        run();
+      });
+    });
+
+    function run() {
+        var mdText = document.getElementById('content').value;
+
+        var md = window.markdownit({
+            html: true,
+            linkify: true,
+            typographer: true
+        });
+
+        // HOWTO: Render the xmp#markdown content as html
+        document.getElementById('preview').innerHTML = md.render(mdText);
+    }
+    </script>
+{% endblock %}
