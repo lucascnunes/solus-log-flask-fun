@@ -448,7 +448,6 @@ def privates():
 #---------------------------------------------------------------------------------------------------
 
 @app.route('/profile/<username>')
-@login_required
 def profile(username):
     query = Entry.author(username).order_by(Entry.timestamp.desc())
     return object_list('index.html', query, profile=username, check_bounds=False)
