@@ -249,7 +249,7 @@ def register():
                             password = bcrypt.generate_password_hash(request.form.get('password')),
                             authenticated = False)
                 except:
-                    flash('Error: This username is already exist.', 'danger')
+                    flash('Error: This username already exist.', 'danger')
                 else:
                     flash('Account created successfully.', 'success')
                     return redirect(url_for('login'))
