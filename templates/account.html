@@ -21,8 +21,13 @@
     </div>
     <div class="form-group">
       <label for="email" class="col-sm-2 control-label">Email <span class="label label-danger">not editable</span></label>
-      <div class="col-sm-10">
+      <div class="col-sm-8">
         <input class="form-control" id="email" name="email" readonly="readonly" type="text" value="{{ current_user.email }}">
+      </div>
+      <div class="col-sm-2">
+        <div style="position: relative;">
+          <div class="circle-avatar" style="background-image:url({{ current_user.avatar(120) }});margin-top: -7px;"></div> <a href="https://pt.gravatar.com/" data-toggle="tooltip" data-placement="bottom" title="We use Gravatar as the avatars repository" target="_blank" style="font-size:13px;position: absolute;margin-top:6px;">Set your gravatar</a>
+        </div>
       </div>
     </div>
     <div class="form-group">
@@ -58,6 +63,7 @@
 {% block extra_scripts %}
 <script>
 $(function() {
+  $('[data-toggle="tooltip"]').tooltip(); 
   $('#username, #email, #password, #confirm-password').on('keypress', function(e) {
       if (e.which == 32)
           return false;
