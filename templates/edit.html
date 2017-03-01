@@ -10,4 +10,5 @@
 
 {% block delete_button %} <a href="{{ url_for('delete', slug=entry.slug) }}" class="btn btn-danger btn-sm">Delete</a> {% endblock %}
 
+{% block author %}<a href="{{ url_for('profile', username=entry.get_user(entry.user_id).username) }}" data-toggle="tooltip" data-placement="left" title="{{ entry.get_user(entry.user_id).name }}" style="float:right;margin-left: 6px;"><div class="circle-avatar" style="background-image:url({{ entry.get_user(entry.user_id).avatar(120) }});"></div></a>{% endblock %}
 

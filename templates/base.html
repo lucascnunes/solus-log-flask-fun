@@ -31,13 +31,15 @@
             <li><a href="{{ url_for('index') }}">{% if config['INDEX_PAGE_NAME'] %}{{ config['INDEX_PAGE_NAME'] }}{% else %}Logs{% endif %}</a></li>
             {% if session.get('logged_in') %}
               <li><a href="{{ url_for('drafts') }}">Drafts</a></li>
-              <li><a href="{{ url_for('create') }}">Create Entry</a></li>
+              <li><a href="{{ url_for('privates') }}">Private</a></li>
+              <li><a href="{{ url_for('create') }}">Create entry</a></li>
             {% endif %}
             {% block extra_header %}{% endblock %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if session.get('logged_in') %}
-              <li class="navbar-brand" style="font-size:13px;">Hi {{ g.user.name }}!</li>
+              <li class="navbar-brand" style="font-size:13px;"><a href="{{ url_for('profile', username=current_user.username) }}" style="padding-top: 0;"><div class="circle-avatar" style="background-image:url({{ current_user.avatar(120) }});"></div>Hi, {{ current_user.name }}!</a></li>
+              <li><a href="{{ url_for('account') }}">Account</a></li>
               <li><a href="{{ url_for('logout') }}">Sign out</a></li>
             {% else %}
               <li><a href="{{ url_for('register') }}">Sign up</a></li>
@@ -54,7 +56,6 @@
         </div>
       </div>
     </div>
-
     <div class="container-fluid">
       {% for category, message in get_flashed_messages(with_categories=true) %}
         <div class="alert alert-{{ category }} alert-dismissable">
@@ -69,9 +70,10 @@
 
       {% block content %}{% endblock %}
 
-      <footer>
+      <footer style="padding-top: 30px;">
         <hr />
-        <h6>{% if config['FOOTER_TEXT'] %} {{ config['FOOTER_TEXT']|safe }} {% else %}2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a>{% endif %}</h6>
+        <h6>{% if config['FOOTER_TEXT'] %} {{ config['FOOTER_TEXT']|safe }} {% else %}
+        2017 &copy; Solus logs, a non-official logger of Solus Project, created by bx0 (Lucas Nunes) while learning <a href="http://flask.pocoo.org/" target="_blank">Flask</a> <br> The Solus logo is Copyright © 2016-2017 <a href="https://solus-project.com/" target="_blank">Solus Project</a>{% endif %}</h6>
       </footer>
     </div>
     <script src="{{ url_for('static', filename='js/jquery-1.11.0.min.js') }}" type="text/javascript"></script>

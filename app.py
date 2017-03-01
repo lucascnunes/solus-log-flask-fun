@@ -10,6 +10,7 @@ import functools
 import os
 import re
 import urllib
+from hashlib import md5
 
 from flask import (Flask, flash, Markup, redirect, render_template, request, Response, session, url_for, g)
 from flask_bcrypt import Bcrypt
@@ -36,7 +37,7 @@ from playhouse.sqlite_ext import *
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # The playhouse.flask_utils.FlaskDB object accepts database URL configuration.
-DATABASE = 'sqliteext:///%s' % os.path.join(APP_DIR, 'blog.db')
+DATABASE = 'sqliteext:///%s' % os.path.join(APP_DIR, 'app.db')
 DEBUG = False
 
 # The secret key is used internally by Flask to encrypt session data stored
@@ -76,13 +77,19 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-# Pluralize
+# Pluralize template custom tag
 @app.template_filter('pluralize')
 def pluralize(number, singular = '', plural = 's'):
     if number == 1:
         return singular
     else:
         return plural
+
+# --------------------------------------------------------------------------------------------------
+#
+#    User model
+#
+#---------------------------------------------------------------------------------------------------
 
 class User(flask_db.Model, UserMixin):
     username = CharField(unique=True)
@@ -92,33 +99,27 @@ class User(flask_db.Model, UserMixin):
     authenticated = BooleanField(index=True)
     timestamp = DateTimeField(default=datetime.datetime.now, index=True)
     
-    # @property
-    # def is_active(self):
-    #     """ True, as all users are active """
-    #     return True
-
-    # @property
-    # def is_authenticated(self):
-    #     """Return True if the user is authenticated."""
-    #     return self.authenticated
-
-    # @property
-    # def is_anonymous(self):
-    #     """False, as anonymous users aren't supported."""
-    #     return False
-
     def avatar(self, size):
+        """ Get users avatar from gravatar using email """
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(self.email.encode('utf-8')).hexdigest(), size)
 
     def get_id(self):
         """ Return the email address to satisfy Flask-Login's requirements  """
         return self.email
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Entry model
+#
+#---------------------------------------------------------------------------------------------------
+
 class Entry(flask_db.Model):
     title = CharField()
     slug = CharField(unique=True)
     content = TextField()
     published = BooleanField(index=True)
+    private = BooleanField(index=False)
+    user = ForeignKeyField(User, related_name='authors')
     timestamp = DateTimeField(default=datetime.datetime.now, index=True)
 
     @property
@@ -167,11 +168,20 @@ class Entry(flask_db.Model):
 
     @classmethod
     def public(cls):
-        return Entry.select().where(Entry.published == True)
+        return Entry.select().where(Entry.published == True, Entry.private == False)
 
     @classmethod
     def drafts(cls):
-        return Entry.select().where(Entry.published == False)
+        return Entry.select().where(Entry.published == False, Entry.private == False)
+
+    @classmethod
+    def author(cls, username):
+        user = User.select().where(User.username == username).first()
+        return Entry.select().where(Entry.published == True, Entry.private == False, Entry.user_id == user.id)
+
+    @classmethod
+    def privates(cls):
+        return Entry.select().where(Entry.user_id == current_user.id, Entry.private == True)
 
     @classmethod
     def search(cls, query):
@@ -193,8 +203,12 @@ class Entry(flask_db.Model):
                 .join(Entry, on=(FTSEntry.entry_id == Entry.id).alias('entry'))
                 .where(
                     (Entry.published == True) &
+                    (Entry.private == False) &
                     (FTSEntry.match(search)))
                 .order_by(SQL('score').desc()))
+
+    def get_user(self, user_id):
+        return User.select().where(User.id == user_id).first()
 
 class FTSEntry(FTSModel):
     entry_id = IntegerField(Entry)
@@ -203,41 +217,58 @@ class FTSEntry(FTSModel):
     class Meta:
         database = database
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Anonymous only access function
+#
+#---------------------------------------------------------------------------------------------------
+
 def anonymous_required(fn):
     @functools.wraps(fn)
     def inner(*args, **kwargs):
-        if not session.get('logged_in'):
+        if not session.get('logged_in') or not current_user:
             return fn(*args, **kwargs)
         return redirect(url_for('account'))
     return inner
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Register page
+#
+#---------------------------------------------------------------------------------------------------
+
 @app.route('/register/', methods=['GET', 'POST'])
 @anonymous_required
 def register():
-    if request.method == 'POST' and request.form.get('username') and request.form.get('email') and request.form.get('password'):
-        if request.form.get('password') == request.form.get('confirm-password'):
-            user = User
-            try:
-                with database.atomic():
-                    user.create(
-                        username = request.form.get('username'),
-                        name = request.form.get('name'),
-                        email = request.form.get('email'),
-                        password = bcrypt.generate_password_hash(request.form.get('password')),
-                        authenticated = True)
-            except IntegrityError:
-                flash('Error: This user is already exist.', 'danger')
+    if request.method == 'POST':
+        if request.form.get('username') and request.form.get('name') and request.form.get('email') and request.form.get('password'):
+            if request.form.get('password') == request.form.get('confirm-password'):
+                user = User
+                try:
+                    with database.atomic():
+                        user.create(
+                            username = request.form.get('username'),
+                            name = request.form.get('name'),
+                            email = request.form.get('email'),
+                            password = bcrypt.generate_password_hash(request.form.get('password')),
+                            authenticated = False)
+                except:
+                    flash('Error: This username is already exist.', 'danger')
+                else:
+                    flash('Account created successfully.', 'success')
+                    return redirect(url_for('login'))
             else:
-                flash('Account saved successfully.', 'success')
-                login_user(user)
-                session['logged_in'] = True
-                session.permanent = True
-                return redirect(url_for('index'))
+                flash('Your password don\'t match the confirm password.', 'danger')
         else:
-            flash('Your password don\'t match the confirm password.', 'danger')
+            flash('Please fill all the fields.', 'danger')
 
     return render_template('register.html')
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Login page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/login/', methods=['GET', 'POST'])
 @anonymous_required
@@ -246,61 +277,92 @@ def login():
     if request.method == 'POST' and request.form.get('password') and request.form.get('username'):
         password = request.form.get('password')
         username = request.form.get('username')
-        try:
-            registered_user = User.select().where(User.username == username).get()
-        except:
-            flash('User don\' exist.', 'danger')
-        else:
+        if User.select().where(User.username == username):
+            registered_user = User.select().where(User.username == username).first()
             if bcrypt.check_password_hash(registered_user.password, password):
                 login_user(registered_user, remember=True)
+                registered_user.authenticated = True
+                registered_user.save()
+                print('%s has logged in' % current_user.name)
                 session['logged_in'] = True
                 session.permanent = True  # Use cookie to store session.
                 flash('You are now logged in.', 'success')
                 return redirect(next_url or url_for('index'))
             else:
                 flash('Incorrect password.', 'danger')
+        else:
+            flash('User don\' exist.', 'danger')
+            
     return render_template('login.html', next_url=next_url)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Logout page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/logout/', methods=['GET', 'POST'])
 def logout():
     if request.method == 'POST':
-        user = current_user
-        user.authenticated = False
-        session.clear()
-        logout_user()
-        return redirect(url_for('login'))
+        try:
+            user = current_user
+            user.authenticated = False
+            user.save()
+            print('%s has logged out' % current_user.name)
+        except:
+            flash('Error: couldn\'t log out user.', 'danger')
+        else:
+            session.clear()
+            logout_user()
+            return redirect(url_for('login'))
     return render_template('logout.html')
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Account page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/account/', methods=['GET', 'POST'])
 @login_required
 def account():
     user = current_user
     if request.method == 'POST':
-        if request.form.get('actual-password'):
-            if request.form.get('new-password') and request.form.get('new-password') == request.form.get('confirm-new-password'):
-                user.password = bcrypt.generate_password_hash(request.form.get('new-password'))
+        if request.form.get('password'):
+            check_password = User.select().where(User.email==current_user.email).first()
+            if bcrypt.check_password_hash(check_password.password, request.form.get('password')):
+                user.name = request.form.get('name')
+
+                if request.form.get('new-password') != '' and request.form.get('confirm-new-password') != '':
+                    if request.form.get('new-password') == request.form.get('confirm-new-password'):
+                        if len(request.form.get('new-password')) > 6:
+                            user.password = bcrypt.generate_password_hash(request.form.get('new-password'))
+                        else:
+                            flash('Your new password is too small. 6 characters minimum.', 'danger')
+                            return redirect(url_for('account'))
+                    else:
+                        flash('Your new password doesn\'t match confirm new password.', 'danger')
+                        return redirect(url_for('account'))
                 try:
                     with database.atomic():
                         user.save()
-                except IntegrityError:
-                    flash('Error: couldn\'t save your new password.', 'danger')
+                except:
+                    flash('Error: couldn\'t save your profile.', 'danger')
                 else:
-                    pass
+                    flash('Account profile saved successfuly.', 'success')
+                    return redirect(url_for('account'))
             else:
-                flash('Your new password doesn\'t match confirm new password', 'danger')
-
-            user.email = request.form.get('email')
-            user.name = request.form.get('name')
-            try:
-                with database.atomic():
-                    user.save()
-            except IntegrityError:
-                flash('Error: couldn\'t save your profile.', 'danger')
-            else:
-                flash('Account profile saved successfuly.', 'success')
-                return redirect(url_for('account'))
-
+                flash('Your actual password is not correct.', 'danger')
+                return redirect(url_for('account'))    
+        else:
+            flash('The actual password is required for any changes.', 'danger')
     return render_template('account.html', user=user)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Index page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/')
 def index():
@@ -314,17 +376,21 @@ def index():
     # paginating the results if there are more than 20. For more info see
     # the docs:
     # http://docs.peewee-orm.com/en/latest/peewee/playhouse.html#object_list
-    return object_list(
-        'index.html',
-        query,
-        search=search_query,
-        check_bounds=False)
+    return object_list('index.html', query, search=search_query, check_bounds=False)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Create or edit function
+#
+#---------------------------------------------------------------------------------------------------
 
 def _create_or_edit(entry, template):
     if request.method == 'POST':
         entry.title = request.form.get('title') or ''
         entry.content = request.form.get('content') or ''
         entry.published = request.form.get('published') or False
+        entry.private = request.form.get('private') or False
+        entry.user_id = current_user.id
         if not (entry.title and entry.content):
             flash('Title and Content are required.', 'danger')
         else:
@@ -344,16 +410,58 @@ def _create_or_edit(entry, template):
 
     return render_template(template, entry=entry)
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Create entry page
+#
+#---------------------------------------------------------------------------------------------------
+
 @app.route('/create/', methods=['GET', 'POST'])
 @login_required
 def create():
     return _create_or_edit(Entry(title='', content=''), 'create.html')
 
+# --------------------------------------------------------------------------------------------------
+#
+#    Drafts page
+#
+#---------------------------------------------------------------------------------------------------
+
 @app.route('/drafts/')
 @login_required
 def drafts():
     query = Entry.drafts().order_by(Entry.timestamp.desc())
-    return object_list('index.html', query, check_bounds=False)
+    return object_list('index.html', query, drafts=1, check_bounds=False)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Private page
+#
+#---------------------------------------------------------------------------------------------------
+
+@app.route('/private/')
+@login_required
+def privates():
+    query = Entry.privates().order_by(Entry.timestamp.desc())
+    return object_list('index.html', query, privates=1, check_bounds=False)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Profile entries page
+#
+#---------------------------------------------------------------------------------------------------
+
+@app.route('/profile/<username>')
+@login_required
+def profile(username):
+    query = Entry.author(username).order_by(Entry.timestamp.desc())
+    return object_list('index.html', query, profile=username, check_bounds=False)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Detail page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/<slug>/')
 def detail(slug):
@@ -362,18 +470,55 @@ def detail(slug):
     else:
         query = Entry.public()
     entry = get_object_or_404(query, Entry.slug == slug)
-    return render_template('detail.html', entry=entry)
+    check = Entry.select().where(Entry.slug==slug).first()
+    if check.private:
+        check_owner = Entry.select().where(Entry.user_id == current_user.id, Entry.slug == slug)
+        if check_owner:   
+            return render_template('detail.html', entry=entry)
+        else:
+            flash('You\'re not allowed to see private entries from others.', 'danger')
+            return redirect(url_for('privates'))
+    else:
+        return render_template('detail.html', entry=entry)
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Edit page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/<slug>/edit/', methods=['GET', 'POST'])
 @login_required
 def edit(slug):
     entry = get_object_or_404(Entry, Entry.slug == slug)
+    check = Entry.select().where(Entry.slug==slug).first()
+    if check.private:
+        check_owner = Entry.select().where(Entry.user_id == current_user.id, Entry.slug == slug)
+        if check_owner:   
+            return _create_or_edit(entry, 'edit.html')
+        else:
+            flash('You\'re not allowed to see private entries from others.', 'danger')
+            return redirect(url_for('privates'))
     return _create_or_edit(entry, 'edit.html')
+
+# --------------------------------------------------------------------------------------------------
+#
+#    Delete page
+#
+#---------------------------------------------------------------------------------------------------
 
 @app.route('/<slug>/delete/', methods=['GET', 'POST'])
 @login_required
 def delete(slug):
     entry = get_object_or_404(Entry.select(), Entry.slug == slug)
+    check = Entry.select().where(Entry.slug==slug).first()
+    if check.private:
+        check_owner = Entry.select().where(Entry.user_id == current_user.id, Entry.slug == slug)
+        if check_owner:   
+            return render_template('detail.html', entry=entry)
+        else:
+            flash('You\'re not allowed to see private entries from others.', 'danger')
+            return redirect(url_for('privates'))
     if request.method == 'POST':
         if not entry:
             flash('This entry don\' exist.', 'danger')
@@ -389,9 +534,11 @@ def delete(slug):
 
     return render_template('delete.html', entry=entry)
 
-@app.before_request
-def before_request():
-    g.user = current_user
+# --------------------------------------------------------------------------------------------------
+#
+#    Initialization
+#
+#---------------------------------------------------------------------------------------------------
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -399,11 +546,8 @@ def user_loader(user_id):
 
     :param unicode user_id: user_id (email) user to retrieve
     """
-    try:
-        return User.get(email==user_id)
-    except:
-        return None
-
+    return User.get(email=user_id)
+    
 @app.template_filter('clean_querystring')
 def clean_querystring(request_args, *keys_to_remove, **new_values):
     # We'll use this template filter in the pagination include. This filter
@@ -422,7 +566,7 @@ def not_found(exc):
     return render_template('404.html')
 
 def main():
-    database.create_tables([Entry, FTSEntry, User], safe=True)
+    database.create_tables([User, Entry, FTSEntry], safe=True)
     app.run(host='0.0.0.0', debug=True, port=app.config['PORT'])
 
 if __name__ == '__main__':

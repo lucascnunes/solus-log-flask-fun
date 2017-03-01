@@ -2,11 +2,13 @@
 
 {% block title %}{% if config['INDEX_PAGE_NAME'] %}{{ config['INDEX_PAGE_NAME'] }}{% else %}Logs{% endif %}{% endblock %}
 
-{% block content_title %}{% if search %}Searching for "{{ search }}"{% elif drafts %}Drafts{% endif %}{% endblock %}
+{% block content_title %}{% if search %}Searching for "{{ search }}"{% elif drafts %}Unpublished drafts{% elif privates %}Private entr{{ object_list|length|pluralize('y','ies') }}{% elif profile %}Showing {{ profile }} public entr{{ object_list|length|pluralize('y','ies') }}{% endif %}{% endblock %}
 
 {% block content %}
     {% if search %}
       <h6>Showing {{ object_list|length }} entr{{ object_list|length|pluralize('y','ies') }}</h6>
+    {% elif privates %}
+      <h5 class="label label-warning">Only you can see th{{ object_list|length|pluralize('is','ese') }} entr{{ object_list|length|pluralize('y','ies') }}</h5>
     {% endif %}
 
   {% for entry in object_list %}

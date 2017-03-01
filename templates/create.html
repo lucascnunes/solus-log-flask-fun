@@ -22,12 +22,22 @@
           </div>
         </div>
         <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
+          <div class="col-sm-offset-2 col-sm-2">
             <div class="checkbox">
               <label>
                 <input name="published" type="checkbox" value="y"{% if entry.published %} checked="checked"{% endif %}> Published?
               </label>
             </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="checkbox">
+              <label>
+                <input name="private" type="checkbox" value="y"{% if entry.private %} checked="checked"{% endif %}> Private? <span class="label label-default">only you can see</span>
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            {% block author %}{% endblock %}
           </div>
         </div>
         <div class="form-group">
@@ -56,6 +66,7 @@
     <script>
     $( document ).ready(function() {
       run();
+      $('[data-toggle="tooltip"]').tooltip(); 
       $('#content').bind('input propertychange', function() {
         run();
       });
