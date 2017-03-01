@@ -41,6 +41,9 @@ the config.cfg and change options like
 
 ~~User registration/authentication~~
 
+Separate code from app.py into individual files
+
+Administration
 
 **Preview:**
 ![preview](screenshot.png)
