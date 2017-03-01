@@ -13,7 +13,7 @@
 
 {% block content %}
 <div class="container">
-	<h5 class="text-right" style="font-size:13px;"><strong>{{ entry.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</strong> by <a href="{{ url_for('profile', username=entry.get_user(entry.user_id).username) }}" data-toggle="tooltip" data-placement="bottom" title="{{ entry.get_user(entry.user_id).name }}" style="float:right;margin-left: 6px;margin-top: -5px;"><div class="circle-avatar" style="background-image:url({{ entry.get_user(entry.user_id).avatar(120) }});"></div></a></h5>
+	<h5 class="text-right" style="font-size:13px;">{% if public %}<span class="label label-success">Public</span>{% elif draft %}<span class="label label-primary">Draft</span>{% elif private %}<span class="label label-warning">Private</span>{% endif %} <strong>{{ entry.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</strong> by <a href="{{ url_for('profile', username=entry.get_user(entry.user_id).username) }}" data-toggle="tooltip" data-placement="bottom" title="{{ entry.get_user(entry.user_id).name }}" style="float:right;margin-left: 6px;margin-top: -5px;"><div class="circle-avatar" style="background-image:url({{ entry.get_user(entry.user_id).avatar(120) }});"></div></a></h5>
 	<textarea style="display: none;" id="content" cols="30" rows="10">{{ entry.html_content }}</textarea>
 	<div id="preview" class="markdown"></div>
 </div>

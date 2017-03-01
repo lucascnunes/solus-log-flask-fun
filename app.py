@@ -469,12 +469,12 @@ def detail(slug):
     if check.private:
         check_owner = Entry.select().where(Entry.user_id == current_user.id, Entry.slug == slug)
         if check_owner:   
-            return render_template('detail.html', entry=entry)
+            return render_template('detail.html', private=1, entry=entry)
         else:
             flash('You\'re not allowed to see private entries from others.', 'danger')
             return redirect(url_for('privates'))
     else:
-        return render_template('detail.html', entry=entry)
+        return render_template('detail.html', public=1, entry=entry)
 
 # --------------------------------------------------------------------------------------------------
 #
