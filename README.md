@@ -32,6 +32,7 @@ the config.cfg and change options like
 	* INDEX_PAGE_NAME
 	* FOOTER_TEXT
 	* PORT
+	* SECRET_KEY
 
 
 **@todos**

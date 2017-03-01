@@ -40,10 +40,6 @@ APP_DIR = os.path.dirname(os.path.realpath(__file__))
 DATABASE = 'sqliteext:///%s' % os.path.join(APP_DIR, 'app.db')
 DEBUG = False
 
-# The secret key is used internally by Flask to encrypt session data stored
-# in cookies. Make this unique for your app.
-SECRET_KEY = 'shhh, secret!'
-
 # This is used by micawber, which will attempt to generate rich media
 # embedded objects with maxwidth=800.
 SITE_WIDTH = 800
