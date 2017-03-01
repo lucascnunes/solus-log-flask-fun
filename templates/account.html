@@ -12,18 +12,26 @@
       <div class="col-sm-10">
         <input class="form-control" id="username" readonly="readonly" name="username" type="text" value="{{ current_user.username }}">
       </div>
+    </div>
+    <div class="form-group">
       <label for="name" class="col-sm-2 control-label">Name</label>
       <div class="col-sm-10">
         <input class="form-control" id="name" name="name" type="text" value="{{ current_user.name }}">
       </div>
+    </div>
+    <div class="form-group">
       <label for="email" class="col-sm-2 control-label">Email <span class="label label-danger">not editable</span></label>
       <div class="col-sm-10">
         <input class="form-control" id="email" name="email" readonly="readonly" type="text" value="{{ current_user.email }}">
       </div>
+    </div>
+    <div class="form-group">
       <label for="new-password" class="col-sm-2 control-label">New Password</label>
       <div class="col-sm-10">
         <input class="form-control" id="new-password" name="new-password" type="password">
       </div>
+    </div>
+    <div class="form-group">
       <label for="confirm-new-password" class="col-sm-2 control-label">Confirm New Password</label>
       <div class="col-sm-10">
         <input class="form-control" id="confirm-new-password" name="confirm-new-password" type="password">
