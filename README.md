@@ -7,13 +7,7 @@ Application created while learning Flask using their blog tutorial
 For the application to work properly run this command to install the packages
 
 ```bash
-pip install flask peewee pygments markdown micawber BeautifulSoup flask-bcrypt flask-login
-```
-
-or
-
-```bash
-pip install -r requirements.txt
+	pip install -r requirements.txt
 ```
 
 ### Executing application
