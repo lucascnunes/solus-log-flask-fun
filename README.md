@@ -41,6 +41,8 @@ the config.cfg and change options like
 
 ~~User registration/authentication~~
 
+~~CSRF~~
+
 Separate code from app.py into individual files
 
 Administration
