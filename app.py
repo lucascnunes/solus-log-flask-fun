@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #-*- coding: utf-8 -*-
 #################################################################################
 #      Application created while learning Flask using their blog tutorial       #
