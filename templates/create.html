@@ -9,6 +9,7 @@
   <div class="row">
     <div class="col-lg-6">
       <form action="{% block form_action %}{{ url_for('create') }}{% endblock %}" class="form-horizontal" method="post">
+    <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
         <div class="form-group">
           <label for="title" class="col-sm-2 control-label">Title</label>
           <div class="col-sm-10">

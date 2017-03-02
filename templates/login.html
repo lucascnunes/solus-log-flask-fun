@@ -7,6 +7,7 @@
 {% block content %}
 <div class="container">
   <form action="{{ url_for('login', next=next_url) }}" class="form-horizontal" method="post">
+    <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
     <div class="form-group">
       <label for="username" class="col-sm-2 control-label">Username</label>
       <div class="col-sm-10">
