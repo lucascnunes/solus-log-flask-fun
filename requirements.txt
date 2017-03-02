@@ -7,6 +7,7 @@ click==6.7
 Flask==0.12
 Flask-Bcrypt==0.7.1
 Flask-Login==0.4.0
+Flask-WTF==0.14.2
 inflect==0.2.5
 itsdangerous==0.24
 Jinja2==2.9.5
@@ -20,3 +21,4 @@ Pygments==2.2.0
 pyparsing==2.1.10
 six==1.10.0
 Werkzeug==0.11.15
+WTForms==2.1
